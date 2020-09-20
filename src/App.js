@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Route,
   BrowserRouter as Router,
@@ -11,7 +11,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import { auth } from './services/firebase';
 
-const PrivateRoute = ({comonent: Component, authenticated, ...rest})=> <Route
+const PrivateRoute = ({component: Component, authenticated, ...rest})=> <Route
   {...rest}
   render={(props)=>authenticated === true ? <Component{...props}
 /> : <Redirect to={{ pathname: '/login', state: { from: props.location } }} />} />
@@ -28,11 +28,28 @@ function PublicRoute({ component: Component, authenticated, ...rest }) {
 }
 
 function App() {
-  return (
-    <div className="App">
-    
-    </div>
-  );
+
+  const [loading, setLoading] = useState(true)
+  const [authenticated, setAuth] = useState(false)
+
+  useEffect(auth().onAuthStateChanged((user)=>{
+    if(user){
+      setLoading(false)
+      setAuth(true)
+    }else{
+      setAuth(false)
+      setLoading(false)
+    }
+  }), [])
+
+  return loading === true ? <h2>LOADING...</h2> : (   <Router>
+    <Switch>
+      <Route exact path="/" component={Home}></Route>
+      <PrivateRoute path="/chat" authen = {authenticated} component={Chat}></PrivateRoute>
+      <PublicRoute path="/signup" authen = {authenticated} component={Signup}></PublicRoute>
+      <PublicRoute path="/login" authen = {authenticated} component={Login}></PublicRoute>
+    </Switch>
+  </Router>) 
 }
 
 export default App;
