@@ -1,72 +1,110 @@
-import React,{useEffect, useState} from 'react'
-import { Link } from 'react-router-dom';
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { signin, signInWithGoogle, signInWithGitHub } from "../helpers/auth";
-import useSignUpForm from '../customhooks/CustomHooks.js';
 
+export default class Login extends Component {
+  constructor() {
+    super();
+    this.state = {
+      error: null,
+      email: "",
+      password: ""
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.googleSignIn = this.googleSignIn.bind(this);
+    this.githubSignIn = this.githubSignIn.bind(this);
+  }
 
+  handleChange(event) {
+    this.setState({
+      [event.target.name]: event.target.value
+    });
+  }
 
-export default function Login() {
-    const signup = () => {
-        alert(`User Created!
-               Name: ${inputs.firstName} ${inputs.lastName}
-               Email: ${inputs.email}`);
-      }
-      const googleSignIn = useEffect(()=>{
-     (  async ()=> {
-        try {
-          await signInWithGoogle();
-        } catch (error) {
-          this.setState({ error: error.message });
-        }
-      })()
-    })
-    const {inputs, handleInputChange, handleSubmit} = useSignUpForm();
+  async handleSubmit(event) {
+    event.preventDefault();
+    this.setState({ error: "" });
+    try {
+      await signin(this.state.email, this.state.password);
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  }
+
+  async googleSignIn() {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  }
+
+  async githubSignIn() {
+    try {
+      await signInWithGitHub();
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  }
+
+  render() {
     return (
-        <div>
-            <form
+      <div className="container">
+        <form
+          className="mt-5 py-5 px-5"
           autoComplete="off"
-          onSubmit={handleSubmit}
+          onSubmit={this.handleSubmit}
         >
           <h1>
             Login to
-            <Link to="/">
+            <Link className="title ml-2" to="/">
               Chatty
             </Link>
           </h1>
-          <p>
+          <p className="lead">
             Fill in the form below to login to your account.
           </p>
-          <div>
+          <div className="form-group">
             <input
+              className="form-control"
               placeholder="Email"
               name="email"
               type="email"
-              onChange={handleInputChange}
-              value={inputs.email}
+              onChange={this.handleChange}
+              value={this.state.email}
             />
           </div>
-          <div>
+          <div className="form-group">
             <input
+              className="form-control"
               placeholder="Password"
               name="password"
-              onChange={handleInputChange}
-              value={inputs.password}
+              onChange={this.handleChange}
+              value={this.state.password}
               type="password"
             />
           </div>
-          <div>
-           
-            <button type="submit">Login</button>
+          <div className="form-group">
+            {this.state.error ? (
+              <p className="text-danger">{this.state.error}</p>
+            ) : null}
+            <button className="btn btn-primary px-5" type="submit">Login</button>
           </div>
+          <p>You can also log in with any of these services</p>
+          <button className="btn btn-danger mr-2" type="button" onClick={this.googleSignIn}>
+            Sign in with Google
+          </button>
+          <button className="btn btn-secondary" type="button" onClick={this.githubSignIn}>
+            Sign in with GitHub
+          </button>
           <hr />
           <p>
             Don't have an account? <Link to="/signup">Sign up</Link>
           </p>
-          <p>Or</p>
-            <button onClick={googleSignIn} type="button">
-                Sign up with Google
-            </button>
         </form>
-        </div>
-    )
+
+      </div>
+    );
+  }
 }
